@@ -87,16 +87,16 @@ class PostController extends Controller
         // dd($request->all());
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+    // /**
+    //  * Display the specified resource.
+    //  *
+    //  * @param  int  $id
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function show($id)
+    // {
+    //     //
+    // }
 
     /**
      * Show the form for editing the specified resource.
@@ -106,7 +106,7 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        return view('admin.posts.edit', compact('post'));
     }
 
     /**
