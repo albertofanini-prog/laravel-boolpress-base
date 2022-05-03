@@ -53,28 +53,9 @@ class PostController extends Controller
 
         $data = $request->all();
 
-        //Creare slug
-        $slug = Str::slug( $data['title'] );
-        // dd($slug);
+        $slug = Post::getUniqueSlug($data['title']);
 
-        //Variabile di appoggio per alleggerire while
-        $slug_base = $slug;
-
-        //Contatore per slug
-        $counter = 1;
-
-        //Controllare che non sia doppio
-            //Cercare il primo slug creato con quel determinato titolo
-        $post_present = Post::where('slug', $slug)->first();
-
-        //Ciclo while per controllare che slug sia disponibile
-            //In caso aggiunge $counter
-        while( $post_present ){
-
-            $slug = $slug_base . '-' . $counter;
-            $counter++;
-            $post_present = Post::where('slug', $slug)->first();
-        }
+        dd($slug);
 
         $post = new Post();
         $post->fill( $data ); 
@@ -104,7 +85,7 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post)
     {
         return view('admin.posts.edit', compact('post'));
     }
@@ -116,9 +97,31 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, Post $post)
+    {   
+        //Validare i dati
+        $request->validate([
+            'title'=>'required|string|max:150',
+            'content'=>'required|string',
+            'published_at'=>'nullable|before_or_equal:today'
+        ]);
+        //Prendere id dati
+        $data = $request->all();
+
+        //Se il titolo nuovo è diverso dal titolo salvato
+        if( $post->title != $data['title']){
+            $post = new Post();
+            //nuovo slug
+            $slug = Post::getUniqueSlug($data['title']);
+
+        }
+
+        $data['slug'] = $slug;
+
+        //Aggiornare i dati
+        $post->update($data);
+        //Reindirizzare su index
+        return redirect()->route('admin.posts.index');
     }
 
     /**
