@@ -8,6 +8,8 @@ use App\Post;
 
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Str;
+
 // use App\Http\Controllers\Controller;
 
 class PostController extends Controller
@@ -19,7 +21,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::limit(20)->get();
+        $posts = Post::orderBy('created_at','desc')->limit(20)->get();
 
         return view('admin.posts.index', compact('posts'));
     }
@@ -31,7 +33,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.posts.create');
     }
 
     /**
@@ -42,7 +44,47 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $request->validate([
+            'title'=>'required|string|max:150',
+            'content'=>'required|string',
+            'published_at'=>'nullable|before_or_equal:today'
+        ]);
+
+        $data = $request->all();
+
+        //Creare slug
+        $slug = Str::slug( $data['title'] );
+        // dd($slug);
+
+        //Variabile di appoggio per alleggerire while
+        $slug_base = $slug;
+
+        //Contatore per slug
+        $counter = 1;
+
+        //Controllare che non sia doppio
+            //Cercare il primo slug creato con quel determinato titolo
+        $post_present = Post::where('slug', $slug)->first();
+
+        //Ciclo while per controllare che slug sia disponibile
+            //In caso aggiunge $counter
+        while( $post_present ){
+
+            $slug = $slug_base . '-' . $counter;
+            $counter++;
+            $post_present = Post::where('slug', $slug)->first();
+        }
+
+        $post = new Post();
+        $post->fill( $data ); 
+        $post->slug = $slug;
+
+        $post->save();
+
+        return redirect()->route('admin.posts.index');
+
+        // dd($request->all());
     }
 
     /**
