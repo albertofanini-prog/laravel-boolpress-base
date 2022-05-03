@@ -73,6 +73,9 @@
         </nav>
 
         <main class="py-4">
+            <button>
+                <a href="{{ route('admin.posts.index') }}">Post Index</a>
+            </button>
             @yield('content')
         </main>
     </div>
